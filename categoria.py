@@ -6,15 +6,14 @@ load_dotenv()
 cliente = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 modelo="gpt-4"
 
-prompt_sistema = """  Você é um categorizador de produtos.
+
+def categoriza_produto(nome_produto, lista_categorias_possíveis):
+    prompt_sistema = f""" 
+      Você é um categorizador de produtos.
         Você deve assumir as categorias presentes na lista abaixo.
 
         # Lista de Categorias Válidas
-            - Moda Sustentável
-            - Produtos para o Lar
-            - Beleza Natural
-            - Eletrônicos Verdes
-            - Higiene pessoal
+        {lista_categorias_possíveis.split(",")}
 
         # Formato da Saída
         Produto: Nome do Produto
@@ -25,20 +24,26 @@ prompt_sistema = """  Você é um categorizador de produtos.
         Categoria: Eletrônicos Verdes
 """
 
-prompt_usuario = input( "Apresente o nome de um produto: ")
-
-resposta = cliente.chat.completions.create(
-    messages=[
-        {"role": "system", 
-         "content": prompt_sistema},
-         {"role": "user",
-          "content": prompt_usuario}
-    ],
-    model=modelo,
-    temperature = 0,
-    max_tokens = 200,
-)
 
 
-print(resposta.choices[0].message.content)
-print("\n")
+    resposta = cliente.chat.completions.create(
+        messages=[
+            {"role": "system", 
+            "content": prompt_sistema},
+            {"role": "user",
+            "content": nome_produto}
+        ],
+        model=modelo,
+        temperature = 0,
+        max_tokens = 200,
+    )
+
+    return resposta.choices[0].message.content
+
+
+categorias_válidas = input("informe as categorias válidas, separando por vírgula: ")
+
+while True:
+    nome_produto = input("Informe o nome do produto: ")
+    texto_resposta = categoriza_produto(nome_produto, categorias_válidas)
+    print(texto_resposta)
